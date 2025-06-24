@@ -156,67 +156,97 @@ async function getWrestlerProfile(id) {
     }
   }
 
-  // --- MATCHES (Broadcasted Shows Only) ---
-  const matchesUrl = `https://www.cagematch.net/?id=2&nr=${id}&page=4&showtype=TV-Show%7CPay%20Per%20View%7CPremium%20Live%20Event%7COnline%20Stream&s=0`;
-  const matchesData = await axios.get(matchesUrl, {
-    headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
-  });
-  const $$ = cheerio.load(matchesData.data);
-
-  // Find the table with the correct header row
-  let matchesTable;
-  $$("table").each((_, el) => {
-    const header = $$(el).find("tr").first().text().replace(/\s+/g, "").toLowerCase();
-    if (header.includes("date") && header.includes("match")) {
-      matchesTable = $$(el);
-      return false; // break loop
-    }
-  });
-
+  // --- MATCHES (Broadcasted Shows Only) with Pagination ---
   let matches = [];
   let win = 0, loss = 0, draw = 0;
+  let currentPage = 0;
+  const maxPages = 5; // Limit to 5 pages (500 matches) to prevent infinite loops
+  
+  while (currentPage < maxPages) {
+    const matchesUrl = `https://www.cagematch.net/?id=2&nr=${id}&page=4&showtype=TV-Show%7CPay%20Per%20View%7CPremium%20Live%20Event%7COnline%20Stream&s=${currentPage * 100}`;
+    
+    try {
+      const matchesData = await axios.get(matchesUrl, {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
+      });
+      const $$ = cheerio.load(matchesData.data);
 
-  if (matchesTable && matchesTable.length) {
-    matchesTable.find("tr").slice(1).each((_, tr) => {
-      const tds = $$(tr).find("td");
-      if (tds.length >= 4) {
-        const date = $$(tds[1]).text().trim();
-        
-        // Promotion: get from column 2 (might be empty, get from match text)
-        let promotion = $$(tds[2]).text().trim();
-        
-        // Match: get the full match description from column 3
-        let match = $$(tds[3]).text().trim();
-        
-        // Extract promotion from match text if not in column 2
-        if (!promotion && match.includes("WWE")) {
-          promotion = "WWE";
-        } else if (!promotion && match.includes("AEW")) {
-          promotion = "AEW";
-        } else if (!promotion) {
-          promotion = "Unknown";
+      // Find the table with the correct header row
+      let matchesTable;
+      $$("table").each((_, el) => {
+        const header = $$(el).find("tr").first().text().replace(/\s+/g, "").toLowerCase();
+        if (header.includes("date") && header.includes("match")) {
+          matchesTable = $$(el);
+          return false; // break loop
         }
+      });
 
-        matches.push({ date, promotion, match });
-
-        // Improved win/loss/draw logic
-        const matchLower = match.toLowerCase();
-        const wrestlerNameLower = name.toLowerCase();
-        
-        if (matchLower.includes(`${wrestlerNameLower} defeats`) || 
-            matchLower.startsWith(`${wrestlerNameLower} `) && matchLower.includes(" defeats ")) {
-          win++;
-        } else if (matchLower.includes(` defeats ${wrestlerNameLower}`) ||
-                   matchLower.includes(`defeat ${wrestlerNameLower}`)) {
-          loss++;
-        } else if (matchLower.includes("draw") || matchLower.includes("no contest")) {
-          draw++;
-        }
+      if (!matchesTable || matchesTable.length === 0) {
+        console.log(`No matches table found for wrestler id: ${id}, page: ${currentPage}`);
+        break; // No more matches
       }
-    });
-  } else {
-    console.log("No matches table found for wrestler id:", id);
+
+      const rows = matchesTable.find("tr").slice(1);
+      if (rows.length === 0) {
+        console.log(`No match rows found for wrestler id: ${id}, page: ${currentPage}`);
+        break; // No more matches
+      }
+
+      let pageMatches = 0;
+      rows.each((_, tr) => {
+        const tds = $$(tr).find("td");
+        if (tds.length >= 4) {
+          const date = $$(tds[1]).text().trim();
+          
+          // Promotion: get from column 2 (might be empty, get from match text)
+          let promotion = $$(tds[2]).text().trim();
+          
+          // Match: get the full match description from column 3
+          let match = $$(tds[3]).text().trim();
+          
+          // Extract promotion from match text if not in column 2
+          if (!promotion && match.includes("WWE")) {
+            promotion = "WWE";
+          } else if (!promotion && match.includes("AEW")) {
+            promotion = "AEW";
+          } else if (!promotion) {
+            promotion = "Unknown";
+          }
+
+          matches.push({ date, promotion, match });
+          pageMatches++;
+
+          // Improved win/loss/draw logic
+          const matchLower = match.toLowerCase();
+          const wrestlerNameLower = name.toLowerCase();
+          
+          if (matchLower.includes(`${wrestlerNameLower} defeats`) || 
+              matchLower.startsWith(`${wrestlerNameLower} `) && matchLower.includes(" defeats ")) {
+            win++;
+          } else if (matchLower.includes(` defeats ${wrestlerNameLower}`) ||
+                     matchLower.includes(`defeat ${wrestlerNameLower}`)) {
+            loss++;
+          } else if (matchLower.includes("draw") || matchLower.includes("no contest")) {
+            draw++;
+          }
+        }
+      });
+
+      console.log(`Fetched ${pageMatches} matches from page ${currentPage} for wrestler id: ${id}`);
+      
+      // If we got fewer than 100 matches, we've reached the end
+      if (pageMatches < 100) {
+        break;
+      }
+      
+      currentPage++;
+    } catch (error) {
+      console.error(`Error fetching matches page ${currentPage} for wrestler ${id}:`, error.message);
+      break;
+    }
   }
+  
+  console.log(`Total matches fetched for wrestler ${id}: ${matches.length}`)
 
   // Timeline: Not available by default, so leave empty
   const timeline = [];
@@ -280,6 +310,90 @@ app.get("/api/wrestler/:id", async (req, res) => {
   } catch (err) {
     console.error("Profile fetch error:", err.message);
     res.status(500).json({ error: "Failed to fetch wrestler data", details: err.message });
+  }
+});
+
+async function getFeaturedWrestlers() {
+  const url = "https://www.cagematch.net/?id=2";
+  const { data } = await axios.get(url, {
+    headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
+  });
+  const $ = cheerio.load(data);
+
+  let featuredWrestlers = [];
+  
+  // Look for the section "The most popular active wrestlers"
+  $("b, strong").each((_, el) => {
+    const text = $(el).text().toLowerCase();
+    if (text.includes("most popular active wrestlers") && text.includes("at least 1 match")) {
+      // Found the section, now look for the table after it
+      let table = $(el).nextAll("table").first();
+      if (table.length) {
+        table.find("tr").slice(1).each((index, tr) => {
+          if (index >= 5) return false; // Only get first 5 wrestlers
+          
+          const link = $(tr).find("a[href*='id=2&nr=']");
+          if (link.length > 0) {
+            const href = link.attr("href");
+            const match = href.match(/id=2&nr=(\d+)/);
+            const name = link.text().trim();
+            
+            if (match && name) {
+              featuredWrestlers.push({
+                id: match[1],
+                name,
+                promotion: "Unknown", // Will be determined from match data
+                isActive: true
+              });
+            }
+          }
+        });
+      }
+      return false; // Found what we need, stop searching
+    }
+  });
+
+  // If we didn't find the section, try alternative search
+  if (featuredWrestlers.length === 0) {
+    // Look for any table with wrestler links as fallback
+    $("table").each((_, table) => {
+      const rows = $(table).find("tr").slice(1, 6); // Get first 5 rows
+      rows.each((index, tr) => {
+        const link = $(tr).find("a[href*='id=2&nr=']");
+        if (link.length > 0) {
+          const href = link.attr("href");
+          const match = href.match(/id=2&nr=(\d+)/);
+          const name = link.text().trim();
+          
+          if (match && name && featuredWrestlers.length < 5) {
+            featuredWrestlers.push({
+              id: match[1],
+              name,
+              promotion: "Unknown",
+              isActive: true
+            });
+          }
+        }
+      });
+      
+      if (featuredWrestlers.length >= 5) {
+        return false; // Stop when we have 5 wrestlers
+      }
+    });
+  }
+
+  return featuredWrestlers.slice(0, 5); // Ensure we only return 5
+}
+
+app.get("/api/featured-wrestlers", async (req, res) => {
+  try {
+    console.log("Fetching featured wrestlers from CageMatch");
+    const featuredWrestlers = await getFeaturedWrestlers();
+    console.log(`Found ${featuredWrestlers.length} featured wrestlers`);
+    res.json(featuredWrestlers);
+  } catch (err) {
+    console.error("Featured wrestlers fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch featured wrestlers", details: err.message });
   }
 });
 

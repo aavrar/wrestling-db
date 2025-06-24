@@ -204,10 +204,52 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Test output files (specific to this project)
+# Test output files (specif
+ic to this project)
 backend/test_*.js
 backend/matches.html
 backend/result.json
 
 # Claude conversation files
 CLAUDE.md
+todo.md
+
+# Project-specific unnecessary files
+frontend-backup/
+backend/matches.html
+backend/result.json
+backend/server.log
+backend/test_*.js
+frontend/backend.log
+frontend/package-original.json
+frontend/pnpm-lock.yaml
+*.backup
+
+# Lock files (keep only one type)
+pnpm-lock.yaml
+package-lock.json
+
+# Placeholder images (often auto-generated)
+frontend/public/placeholder*.svg
+frontend/public/placeholder*.png
+frontend/public/placeholder*.jpg
+
+# Log files
+*.log
+server.log
+backend.log
+
+# Python virtual environment and cache
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Next.js specific
+.next/
+out/
+
+# Development backups
+*.backup
+*.bak
+*.orig
