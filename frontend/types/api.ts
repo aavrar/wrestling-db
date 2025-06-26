@@ -352,6 +352,7 @@ export interface RequestConfig {
   timeout?: number
   cache?: CacheOptions
   retries?: number
+  retryDelay?: number
 }
 
 // Webhook types (if implementing real-time updates)

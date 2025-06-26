@@ -9,6 +9,7 @@ import Link from "next/link"
 import { getFeaturedWrestlers, createSlug } from "@/lib/api"
 import { FeaturedWrestler } from "@/types/wrestler"
 import { FeaturedWrestlersSkeleton, ErrorState } from "@/components/loading-states"
+import { generateAvatarProps } from "@/lib/avatar-utils"
 
 export function WrestlerCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -108,12 +109,14 @@ export function WrestlerCarousel() {
                   <CardContent className="p-0">
                     <div className="grid md:grid-cols-2 gap-0">
                       <div className="relative h-64 md:h-80 bg-gradient-to-br from-cyan-100 to-purple-100 flex items-center justify-center">
-                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-4xl md:text-5xl font-bold text-white shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                          {wrestler.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </div>
+                        {(() => {
+                          const avatarProps = generateAvatarProps(wrestler.name)
+                          return (
+                            <div className={`w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br ${avatarProps.gradient} flex items-center justify-center text-4xl md:text-5xl font-bold text-white shadow-2xl group-hover:scale-110 transition-transform duration-300`}>
+                              {avatarProps.initials}
+                            </div>
+                          )
+                        })()}
                       </div>
                       <div className="p-6 md:p-8 flex flex-col justify-center bg-white/40">
                         <div className="flex items-center gap-3 mb-3">

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star, MapPin, Calendar, Ruler, Weight, Trophy, Share2, Heart, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { generateAvatarProps } from "@/lib/avatar-utils"
 
 interface WrestlerHeaderProps {
   wrestler: {
@@ -31,6 +32,8 @@ export function WrestlerHeader({ wrestler }: WrestlerHeaderProps) {
     month: "long",
     day: "numeric",
   })
+  
+  const avatarProps = generateAvatarProps(wrestler.name)
 
   return (
     <div className="relative overflow-hidden">
@@ -55,11 +58,8 @@ export function WrestlerHeader({ wrestler }: WrestlerHeaderProps) {
           <div className="lg:col-span-1">
             <Card className="bg-white/60 backdrop-blur-xl border-slate-200/50 overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
               <CardContent className="p-0">
-                <div className="aspect-[3/4] bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-6xl font-bold text-white shadow-inner">
-                  {wrestler.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                <div className={`aspect-[3/4] bg-gradient-to-br ${avatarProps.gradient} flex items-center justify-center text-6xl font-bold text-white shadow-inner`}>
+                  {avatarProps.initials}
                 </div>
               </CardContent>
             </Card>

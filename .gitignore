@@ -4,38 +4,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
-
-# Python dependencies
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-venv/
-env/
-ENV/
-
-# Production builds
-/frontend/build/
-/frontend/dist/
+.pnpm-debug.log*
 
 # Environment variables
 .env
@@ -45,14 +14,22 @@ ENV/
 .env.production.local
 *.env
 
+# Build outputs
+.next/
+out/
+dist/
+build/
+/frontend/build/
+/frontend/dist/
+
+# TypeScript
+*.tsbuildinfo
+
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+server.log
+backend.log
 
 # Runtime data
 pids
@@ -63,88 +40,59 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
-
-# nyc test coverage
 .nyc_output
 
-# Grunt intermediate storage
-.grunt
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Bower dependency directory
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release
-
-# Dependency directories
-jspm_packages/
-
-# Snowpack dependency directory
-web_modules/
-
-# TypeScript cache
-*.tsbuildinfo
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Optional npm cache directory
 .npm
-
-# Optional eslint cache
 .eslintcache
-
-# Optional stylelint cache
 .stylelintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
 
 # Optional REPL history
 .node_repl_history
 
 # Output of 'npm pack'
 *.tgz
+*.tar.gz
 
 # Yarn Integrity file
 .yarn-integrity
 
-# parcel-bundler cache
+# Parcel and bundler cache
 .cache
 .parcel-cache
-
-# Next.js build output
-.next
-out
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
 # Storybook build outputs
 .out
 .storybook-out
 storybook-static
 
-# Rollup.js default build output
-dist/
-
-# Uncomment the public line in if your project uses Gatsby and not Next.js
-# public
-
-# vuepress build output
+# VuePress build output
 .vuepress/dist
-
-# vuepress v2.x temp and cache directory
-.temp
-.cache
 
 # Docusaurus cache and generated files
 .docusaurus
@@ -161,9 +109,6 @@ dist/
 # TernJS port file
 .tern-port
 
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
 # yarn v2
 .yarn/cache
 .yarn/unplugged
@@ -171,85 +116,50 @@ dist/
 .yarn/install-state.gz
 .pnp.*
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Testing
-/coverage
-
-# Miscellaneous
-*.tgz
-*.tar.gz
-
-# Local development files
+# Vercel deployment files
 .vercel
 
-# Cache files
-.cache/
+# Python (if any Python tools are used)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+ENV/
 
-# Temporary files
+# Project-specific files to ignore
+# Claude conversation files (development only)
+CLAUDE.md
+todo.md
+usage_tracking*.json
+
+# Backup files
+*.backup
+*.bak
+*.orig
+frontend-backup/
+
+# Test and temporary files
+backend/test_*.js
+backend/matches.html
+backend/result.json
+frontend/backend.log
+frontend/package-original.json
 *.tmp
 *.temp
 
-# Test output files (specif
-ic to this project)
-backend/test_*.js
-backend/matches.html
-backend/result.json
-
-# Claude conversation files
-CLAUDE.md
-todo.md
-
-# Project-specific unnecessary files
-frontend-backup/
-backend/matches.html
-backend/result.json
-backend/server.log
-backend/test_*.js
-frontend/backend.log
-frontend/package-original.json
-frontend/pnpm-lock.yaml
-*.backup
-
-# Lock files (keep only one type)
+# Lock files (keep only one type - npm preferred)
 pnpm-lock.yaml
-package-lock.json
+# Note: package-lock.json is kept for npm
 
-# Placeholder images (often auto-generated)
+# Development placeholder files
 frontend/public/placeholder*.svg
 frontend/public/placeholder*.png
 frontend/public/placeholder*.jpg
 
-# Log files
-*.log
-server.log
-backend.log
+# Upload directories (if they contain user uploads)
+uploads/
 
-# Python virtual environment and cache
-__pycache__/
-*.pyc
-venv/
-env/
-
-# Next.js specific
-.next/
-out/
-
-# Development backups
-*.backup
-*.bak
-*.orig
+# Certificate files
+*.pem
